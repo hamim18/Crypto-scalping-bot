@@ -1,3 +1,11 @@
+pub mod error;
+pub mod types;
+
+// Re-export yang paling umum digunakan agar lebih mudah diakses
+pub use error::{BotError, BotResult};
+pub use types::*;
+
+
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
