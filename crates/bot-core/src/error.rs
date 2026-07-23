@@ -1,6 +1,4 @@
-use std::fmt;
-use std::io;
-
+// Hapus baris `use std::fmt;` karena tidak terpakai
 use serde_json::Error as SerdeJsonError;
 use thiserror::Error;
 
@@ -9,7 +7,7 @@ use thiserror::Error;
 pub enum BotError {
     // --- I/O & Filesystem ---
     #[error("I/O error: {0}")]
-    Io(#[from] io::Error),
+    Io(#[from] std::io::Error),
 
     #[error("Configuration error: {0}")]
     Config(String),
@@ -106,10 +104,7 @@ mod tests {
             field: "min_score".to_string(),
             value: "10".to_string(),
         };
-        assert_eq!(
-            err.to_string(),
-            "Invalid parameter: min_score = 10"
-        );
+        assert_eq!(err.to_string(), "Invalid parameter: min_score = 10");
     }
 
     #[test]

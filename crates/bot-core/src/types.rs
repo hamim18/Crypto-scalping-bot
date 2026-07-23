@@ -5,35 +5,32 @@ use serde::{Deserialize, Serialize};
 // MARKET DATA TYPES
 // ============================================================
 
-/// Ticker real-time dari Indodax
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Ticker {
-    pub timestamp: i64,           // Unix timestamp (detik)
-    pub last_price: f64,          // IDR
-    pub high_24h: f64,            // IDR
-    pub low_24h: f64,             // IDR
+    pub timestamp: i64,
+    pub last_price: f64,
+    pub high_24h: f64,
+    pub low_24h: f64,
     pub volume_btc: f64,
     pub volume_idr: f64,
 }
 
-/// OHLCV Candle untuk berbagai timeframe
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Candle {
-    pub timestamp: i64,           // Unix timestamp (detik, awal periode)
+    pub timestamp: i64,
     pub open: f64,
     pub high: f64,
     pub low: f64,
     pub close: f64,
-    pub volume: f64,              // Volume BTC
+    pub volume: f64,
 }
 
-/// Trade dari exchange (recent trades)
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ExchangeTrade {
     pub trade_id: String,
     pub timestamp: i64,
     pub price: f64,
-    pub amount: f64,              // BTC
+    pub amount: f64,
     pub side: TradeSide,
 }
 
@@ -43,7 +40,6 @@ pub enum TradeSide {
     Sell,
 }
 
-/// Timeframe untuk candle
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum Timeframe {
     Minutes5,
@@ -65,7 +61,6 @@ impl Timeframe {
 // STRATEGY & SIGNAL TYPES
 // ============================================================
 
-/// Market regime yang terdeteksi
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub enum MarketRegime {
     Trending,
@@ -79,15 +74,14 @@ impl Default for MarketRegime {
     }
 }
 
-/// Trading signal yang dihasilkan oleh strategy engine
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Signal {
     pub action: SignalAction,
-    pub score: u8,                // 0-8
+    pub score: u8,
     pub max_score: u8,
-    pub confidence: f64,          // 0.0 - 1.0
+    pub confidence: f64,
     pub regime: MarketRegime,
-    pub reasons: Vec<String>,     // Kenapa score segitu
+    pub reasons: Vec<String>,
     pub timestamp: i64,
 }
 
@@ -97,14 +91,9 @@ pub enum SignalAction {
     Hold,
 }
 
-/// Konfigurasi yang dipakai strategy engine (akan diisi dari config.yaml)
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct StrategyConfig {
-    pub enabled: bool,
-    pub entry: EntryConfig,
-    pub exit: ExitConfig,
-    pub risk: RiskConfig,
-}
+// ============================================================
+// CONFIGURATION SUB-STRUCTS (LENGKAP)
+// ============================================================
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EntryConfig {
@@ -130,10 +119,10 @@ pub struct RsiConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ExitConfig {
-    pub take_profit_levels: [f64; 3],      // R units
-    pub close_percentages: [f64; 3],       // %
-    pub trailing_stop_activation: f64,     // R units
-    pub trailing_stop_distance: f64,       // R units
+    pub take_profit_levels: [f64; 3],
+    pub close_percentages: [f64; 3],
+    pub trailing_stop_activation: f64,
+    pub trailing_stop_distance: f64,
     pub max_hold_hours: u8,
 }
 
@@ -144,6 +133,34 @@ pub struct RiskConfig {
     pub daily_loss_limit_pct: f64,
     pub max_consecutive_losses: u8,
     pub max_daily_trades: u16,
+    // 👇 Field yang diperlukan oleh config.rs
+    pub price_spike_threshold_pct: f64,
+    pub min_order_idr: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SessionConfig {
+    pub start: String, // "HH:MM"
+    pub end: String,
+    pub enabled: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SessionGroup {
+    pub asia: SessionConfig,
+    pub low: SessionConfig,
+    pub us_eu: SessionConfig,
+    pub off: SessionConfig,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StrategyConfig {
+    pub enabled: bool,
+    pub entry: EntryConfig,
+    pub exit: ExitConfig,
+    pub risk: RiskConfig,
+    // 👇 Field sessions yang dibutuhkan
+    pub sessions: SessionGroup,
 }
 
 // ============================================================
@@ -173,15 +190,14 @@ pub enum OrderStatus {
     Failed,
 }
 
-/// Order yang ditempatkan ke exchange
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Order {
-    pub id: Option<i64>,                 // DB id
+    pub id: Option<i64>,
     pub exchange_order_id: Option<String>,
     pub pair: String,
     pub side: OrderSide,
     pub order_type: OrderType,
-    pub price: Option<f64>,              // None untuk market order
+    pub price: Option<f64>,
     pub amount_btc: f64,
     pub amount_idr: f64,
     pub status: OrderStatus,
@@ -192,7 +208,6 @@ pub struct Order {
     pub updated_at: DateTime<Utc>,
 }
 
-/// Posisi terbuka (hasil dari order buy yang terisi)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Position {
     pub id: Option<i64>,
@@ -228,7 +243,6 @@ pub enum PositionStatus {
     Closed,
 }
 
-/// Trade yang sudah selesai (buy + sell)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClosedTrade {
     pub id: Option<i64>,
@@ -259,7 +273,6 @@ pub struct ClosedTrade {
 // CAPITAL & PERFORMANCE TYPES
 // ============================================================
 
-/// Status modal & equity
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CapitalStatus {
     pub working_capital: f64,
@@ -270,10 +283,9 @@ pub struct CapitalStatus {
     pub unrealized_profit: f64,
 }
 
-/// Performa harian ringkas
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DailyPerformance {
-    pub date: String,                // YYYY-MM-DD
+    pub date: String,
     pub working_capital: f64,
     pub ending_capital: f64,
     pub pnl_idr: f64,
@@ -285,7 +297,7 @@ pub struct DailyPerformance {
 }
 
 // ============================================================
-// UNIT TESTS: Serialization/Deserialization
+// UNIT TESTS
 // ============================================================
 
 #[cfg(test)]
@@ -318,7 +330,10 @@ mod tests {
             max_score: 8,
             confidence: 0.875,
             regime: MarketRegime::Trending,
-            reasons: vec!["EMA alignment +2".to_string(), "Volume strong +2".to_string()],
+            reasons: vec![
+                "EMA alignment +2".to_string(),
+                "Volume strong +2".to_string(),
+            ],
             timestamp: 1700000000,
         };
 
