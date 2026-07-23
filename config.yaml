@@ -1,0 +1,69 @@
+
+# Default configuration
+database:
+  path: "data/trading.db"
+
+exchange:
+  api_url: "https://indodax.com/api"
+  private_api_url: "https://indodax.com/api"
+  pair: "btcidr"
+  rate_limit: 1  # requests per second
+
+strategy:
+  enabled: true
+  entry:
+    min_score: 5
+    ema_periods:
+      fast: 9
+      medium: 21
+      slow: 50
+    rsi:
+      period: 14
+      oversold: 30
+      overbought: 70
+    macd:
+      fast: 12
+      slow: 26
+      signal: 9
+    volume_threshold: 1.5
+  exit:
+    take_profit_levels: [1.0, 1.5, 2.0]
+    close_percentages: [40, 30, 30]
+    trailing_stop_activation: 0.5
+    trailing_stop_distance: 0.3
+    max_hold_hours: 4
+  risk:
+    max_position_pct: 10.0
+    daily_target_pct: 1.0
+    daily_loss_limit_pct: 5.0
+    max_consecutive_losses: 3
+    max_daily_trades: 20
+    price_spike_threshold_pct: 3.0
+    min_order_idr: 50000
+  sessions:
+    asia:
+      start: "07:00"
+      end: "15:00"
+      enabled: true
+    low:
+      start: "15:00"
+      end: "19:00"
+      enabled: false
+    us_eu:
+      start: "19:00"
+      end: "03:00"
+      enabled: true
+    off:
+      start: "03:00"
+      end: "07:00"
+      enabled: false
+
+api:
+  host: "0.0.0.0"
+  port: 3000
+  rate_limit_per_minute: 100
+
+logging:
+  level: "info"
+  format: "json"  # or "pretty" for development
+  file: "logs/bot.log"

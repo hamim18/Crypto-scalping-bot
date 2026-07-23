@@ -1,0 +1,16 @@
+[workspace]
+members = [
+    "crates/bot-core",
+    "crates/bot-exchange",
+    "crates/bot-api",
+    "crates/bot-cli",
+]
+
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["hamim with AI <hamimltf18@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/hamim18/Crypto-scalping-bot.git"
